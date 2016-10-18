@@ -29,6 +29,7 @@ public class VuukleCommentsBuilder {
     private boolean isSwipeToRefreshEnable = false;
     private boolean addArticleWebView = false;
     private boolean addAdsBanner = true;
+    private boolean addTopArticle = false;
 
     public boolean isEmoteVisible() {
         return isEmoteVisible;
@@ -129,6 +130,17 @@ public class VuukleCommentsBuilder {
         return this;
     }
 
+    //TODO need documentation
+    public VuukleCommentsBuilder setTopArticle(boolean addTopArticle) {
+        this.addTopArticle = addTopArticle;
+        return this;
+    }
+
+    public VuukleCommentsBuilder addAdsBanner(boolean addAdsBanner){
+        this.addAdsBanner = addAdsBanner;
+        return this;
+    }
+
     /**
      * Required field
      * <p> TITLE will be unique for each page where comment box opens.
@@ -139,16 +151,11 @@ public class VuukleCommentsBuilder {
      * <p>Tags - You need to paste tags separated by comma for each article(like you have on website/domain), same for
      * <p>TITLE - title of the article on which library is now.
      */
+
     public VuukleCommentsBuilder setVuukleTitle(String title) {
         TITLE = title;
         return this;
     }
-
-    public VuukleCommentsBuilder addAdsBanner(boolean addAdsBanner){
-        this.addAdsBanner = addAdsBanner;
-        return this;
-    }
-
 
     /**
      * Optional
@@ -171,6 +178,7 @@ public class VuukleCommentsBuilder {
         mContext = context;
         return this;
     }
+
 
     private void checkForException(String parameter, int stringExceptionId) throws VuukleCommentsException {
         if (TextUtils.isEmpty(parameter)) {
@@ -241,7 +249,8 @@ public class VuukleCommentsBuilder {
                     isEmoteVisible,
                     isSwipeToRefreshEnable,
                     addArticleWebView,
-                    addAdsBanner);
+                    addAdsBanner,
+                    addTopArticle);
             ft.add(getContainerId(), fragment);
             ft.commit();
             return fragment;

@@ -22,6 +22,7 @@ public class CommentsListFragment extends Fragment {
     private static boolean isSwipeToRefreshEnable;
     private static boolean addArticleWebView;
     private static boolean addAdsBanner;
+    private static boolean addTopArticle;
 
     protected static CommentsListFragment newInstance(String ARTICLE_ID,
                                                       String API_KEY,
@@ -36,7 +37,8 @@ public class CommentsListFragment extends Fragment {
                                                       boolean isEmoteVisible,
                                                       boolean isSwipeToRefreshEnable,
                                                       boolean addArticleWebView,
-                                                      boolean addAdsBanner) {
+                                                      boolean addAdsBanner,
+                                                      boolean addTopArticle) {
         Bundle args = new Bundle();
         args = putValuesToBundle(args,
                 mContext,
@@ -51,7 +53,8 @@ public class CommentsListFragment extends Fragment {
                 paginationToCount,
                 isEmoteVisible,
                 isSwipeToRefreshEnable,
-                addArticleWebView);
+                addArticleWebView,
+                addTopArticle);
         CommentsListFragment fragment = new CommentsListFragment();
         fragment.setArguments(args);
         return fragment;
@@ -69,7 +72,8 @@ public class CommentsListFragment extends Fragment {
                                             int paginationToCount,
                                             boolean isEmoteVisible,
                                             boolean isSwipeToRefreshEnable,
-                                            boolean addArticleWebView) {
+                                            boolean addArticleWebView,
+                                            boolean addTopArticle) {
         args.putString(mContext.getString(R.string.article_id), ARTICLE_ID);
         args.putString(mContext.getString(R.string.api_key), API_KEY);
         args.putString(mContext.getString(R.string.secret_key), SECRET_KEY);
@@ -83,6 +87,7 @@ public class CommentsListFragment extends Fragment {
         args.putBoolean(mContext.getString(R.string.is_swipe_to_refresh_enable), isSwipeToRefreshEnable);
         args.putBoolean(mContext.getString(R.string.addArticleWebView), addArticleWebView);
         args.putBoolean(mContext.getString(R.string.addAdsBanner), addAdsBanner);
+        args.putBoolean(mContext.getString(R.string.addTopArticle), addTopArticle);
         return args;
     }
 
@@ -116,7 +121,8 @@ public class CommentsListFragment extends Fragment {
                 TITLE,
                 isEmoteVisible,
                 addArticleWebView,
-                addAdsBanner);
+                addAdsBanner,
+                addTopArticle);
         RecyclerView recyclerView = (RecyclerView) fragmentView.findViewById(R.id.comments_list);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setAutoMeasureEnabled(true);
@@ -124,8 +130,6 @@ public class CommentsListFragment extends Fragment {
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setNestedScrollingEnabled(false);
         recyclerView.setAdapter(adapter);
-
-
     }
 
     private void getValuesFromBundle() {
@@ -142,6 +146,7 @@ public class CommentsListFragment extends Fragment {
         isSwipeToRefreshEnable = getArguments().getBoolean(getString(R.string.is_swipe_to_refresh_enable));
         addArticleWebView = getArguments().getBoolean(getString(R.string.addArticleWebView));
         addAdsBanner = getArguments().getBoolean(getString(R.string.addAdsBanner));
+        addTopArticle = getArguments().getBoolean(getString(R.string.addTopArticle));
     }
 }
 

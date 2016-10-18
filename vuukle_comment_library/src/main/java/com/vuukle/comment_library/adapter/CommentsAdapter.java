@@ -26,6 +26,7 @@ import com.vuukle.comment_library.models.EmotesModel;
 import com.vuukle.comment_library.models.HeaderModel;
 import com.vuukle.comment_library.models.LoadMoreModel;
 import com.vuukle.comment_library.models.ReplyModel;
+import com.vuukle.comment_library.models.TopArticleModel;
 import com.vuukle.comment_library.models.User;
 import com.vuukle.comment_library.models.VuukleLogo;
 import com.vuukle.comment_library.network.ApiService;
@@ -45,17 +46,18 @@ import static com.vuukle.comments.vuuklecommentlibrary.R.string.comments;
 
 public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private  final int EMOTES = 0;
-    private  final int HEADER = 1;
-    private  final int COMMENT = 2;
-    private  final int REPLY = 3;
-    private  final int LOAD_MORE = 4;
-    private  final int REPLY_COUNT_EMPTY = 0;
-    private  final int VUUKLE_LOGO = 5;
-    private  final int ADS_BANNER = 6;
-    private  final int ARTICLE_WEBVIEW = 7;
+    private final int EMOTES = 0;
+    private final int HEADER = 1;
+    private final int COMMENT = 2;
+    private final int REPLY = 3;
+    private final int LOAD_MORE = 4;
+    private final int REPLY_COUNT_EMPTY = 0;
+    private final int VUUKLE_LOGO = 5;
+    private final int ADS_BANNER = 6;
+    private final int ARTICLE_WEBVIEW = 7;
+    private final int TOP_ARTICLE = 8;
     private int ARTICLE_WEBVIEW_POSITION = 0;
-    private   int BANNER_POSITION = 0;
+    private int BANNER_POSITION = 0;
     static String ARTICLE_ID;
     public static String API_KEY;
     static String SECRET_KEY;
@@ -83,6 +85,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private boolean mAddArticleWebView;
     private int HEADER_POSITION = 0;
     private boolean mAddAdsBanner = false;
+    private boolean mAddTopArticle = false;
 
 
     private PostCommentCallback postCommentCallback = (name, email, comment) -> {
@@ -103,8 +106,10 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                            String tags,
                            String title,
                            boolean isEmoteVisible,
-                           boolean addVebWiewArticle,
-                           boolean addADSBanner){
+                           boolean addWebViewArticle,
+                           boolean addADSBanner,
+                           boolean addTopArticle) {
+
         mContext = context;
         API_KEY = apiKey;
         SECRET_KEY = secretKey;
@@ -120,20 +125,23 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         PAGINATION_TO = paginationToCount;
         PAGGINATION_COUNT = paginationToCount;
         mIsEmoteVisible = isEmoteVisible;
-        mAddArticleWebView = addVebWiewArticle;
+        mAddArticleWebView = addWebViewArticle;
         mAddAdsBanner = addADSBanner;
+        mAddTopArticle = addTopArticle;
         addArticleWebView();
         addAdsBanner();
         addEmotes();
         addHeader();
         loadMoreComments(null);
+        addTopArticle();
+
 
         sPrefs = mContext.getSharedPreferences(mContext.getString(R.string.vuukle), Context.MODE_PRIVATE);
         mEditor = sPrefs.edit();
     }
 
     private void addArticleWebView() {
-        if(mAddArticleWebView){
+        if (mAddArticleWebView) {
             ARTICLE_WEBVIEW_POSITION = 1;
             HEADER_POSITION = 1;
             commentsWithReplies.add(0, new ArticleWebViewModel(ARTICLE_URL));
@@ -148,7 +156,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     private void addAdsBanner() {
-        if(mAddAdsBanner) {
+        if (mAddAdsBanner) {
             commentsWithReplies.add(ARTICLE_WEBVIEW_POSITION, new AdsBannerModel());
             BANNER_POSITION = 1;
         }
@@ -156,6 +164,29 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     private void addHeader() {
         commentsWithReplies.add(new HeaderModel(0));
+    }
+
+    private void addTopArticle() {
+        if (mAddTopArticle) {
+            ApiService.getTopArticle("2e5a47ef-15f6-4eec-a685-65a6d0ed00d0", "indianexpress.com", "", 24, 24, new CancelableCallback() {
+                @Override
+                public void onFailure(Call call, Throwable t) {
+                    Log.d("My", t.getMessage());
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) {
+                    ArrayList<TopArticleModel> topArticle = (ArrayList<TopArticleModel>) response.body();
+                    if (commentsWithReplies.size() > 1) { //TODO if comments load first
+                        commentsWithReplies.addAll(commentsWithReplies.size() - 1, topArticle);
+                    } else {
+                        commentsWithReplies.addAll(getLastCommentPosition() + 1, topArticle);
+                    }
+
+                    notifyDataSetChanged();
+                }
+            });
+        }
     }
 
     @Override
@@ -178,11 +209,14 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         } else if (commentsWithReplies.get(position) instanceof VuukleLogo) {
             return VUUKLE_LOGO;
 
-        } else if(commentsWithReplies.get(position) instanceof AdsBannerModel){
+        } else if (commentsWithReplies.get(position) instanceof AdsBannerModel) {
             return ADS_BANNER;
-        }
-            else if(commentsWithReplies.get(position) instanceof ArticleWebViewModel){
+
+        } else if (commentsWithReplies.get(position) instanceof ArticleWebViewModel) {
             return ARTICLE_WEBVIEW;
+
+        } else if (commentsWithReplies.get(position) instanceof TopArticleModel) {
+            return TOP_ARTICLE;
         }
         return -1;
     }
@@ -204,9 +238,11 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             case VUUKLE_LOGO:
                 return new VuukleLogoHolder(inflater.inflate(R.layout.vuukle_logo, parent, false));
             case ADS_BANNER:
-                return new AdsBannerHolder(inflater.inflate(R.layout.ads_banner_item,parent,false));
+                return new AdsBannerHolder(inflater.inflate(R.layout.ads_banner_item, parent, false));
             case ARTICLE_WEBVIEW:
                 return new ArticleWebViewHolder(inflater.inflate(R.layout.article_webview, parent, false));
+            case TOP_ARTICLE:
+                return new TopArticleViewHolder(inflater.inflate(R.layout.top_article_item, parent, false));
             default:
                 return new CommentsViewHolder(inflater.inflate(R.layout.comment_item, parent, false));
         }
@@ -236,7 +272,16 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 break;
             case ARTICLE_WEBVIEW:
                 break;
+            case TOP_ARTICLE:
+                fillTopArticle((TopArticleViewHolder) holder, position);
+                break;
         }
+    }
+
+    private void fillTopArticle(TopArticleViewHolder holder, int position) {
+        TopArticleModel article = (TopArticleModel) commentsWithReplies.get(position);
+        Picasso.with(mContext).load(article.getImg()).into(holder.articleImg);
+
     }
 
     private LoadMoreHolder createLoadMoreHolder(LayoutInflater inflater, ViewGroup parent) {
@@ -274,9 +319,9 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     private void setLogOutButton(HeaderViewHolder holder) {
-        if(User.isUserLogedIn(mContext)){
+        if (User.isUserLogedIn(mContext)) {
             holder.logout.setVisibility(View.VISIBLE);
-        }else{
+        } else {
             holder.logout.setVisibility(View.GONE);
         }
     }
@@ -536,6 +581,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     private void loadMoreComments(LoadMoreHolder holder) {
+
         ApiService.getAllComments(PAGINATION_FROM, PAGINATION_TO, new CancelableCallback() {
             @Override
             public void onResponse(Call call, Response response) {
@@ -554,7 +600,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     private void setCountComments(int count) {
         sPrefs.edit()
-                .putInt(COUNT_COMMENTS_KEY,count)
+                .putInt(COUNT_COMMENTS_KEY, count)
                 .apply();
     }
 
@@ -562,15 +608,28 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         CommentFeedModel feedModel = (CommentFeedModel) response.body();
         RESOURCE_ID = feedModel.resourceId;
         removeLoadMoreButton(holder);
-        commentsWithReplies.addAll(feedModel.getCommentFeed());
+        int lastCommentPosition = getLastCommentPosition();
+        commentsWithReplies.addAll(lastCommentPosition + 1, feedModel.getCommentFeed());
         ((HeaderModel) commentsWithReplies.get(HEADER_POSITION)).setCommentCount(feedModel.comments);
         if (feedModel.getCommentFeed().size() >= PAGGINATION_COUNT) {
-            commentsWithReplies.add(new LoadMoreModel());
+            commentsWithReplies.add(getLastCommentPosition() + 1, new LoadMoreModel());
         }
         commentsWithReplies.add(new VuukleLogo());
         PAGINATION_FROM = PAGINATION_TO + 1;
         PAGINATION_TO = PAGINATION_FROM + PAGGINATION_COUNT;
         notifyDataSetChanged();
+    }
+
+    private int getLastCommentPosition() {
+        int last = 0;
+        for (int i = commentsWithReplies.size() - 1; i > 0; i--) {
+            if (commentsWithReplies.get(i) instanceof CommentModel
+                    || commentsWithReplies.get(i) instanceof HeaderModel) {
+                last = i;
+                break;
+            }
+        }
+        return last;
     }
 
     private void removeLoadMoreButton(LoadMoreHolder holder) {
@@ -579,13 +638,13 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             holder.loadMoreButton.setVisibility(View.VISIBLE);
         }
 
-        if(commentsWithReplies.size() < 2){
+        if (commentsWithReplies.size() < 2) {
             return;
         }
 
-        if (commentsWithReplies.get(commentsWithReplies.size() - 2) instanceof LoadMoreModel) {
-            commentsWithReplies.remove(commentsWithReplies.size() - 2);
-            notifyItemRemoved(commentsWithReplies.size() - 2);
+        if (commentsWithReplies.get(getLastCommentPosition() + 1) instanceof LoadMoreModel) {
+            commentsWithReplies.remove(getLastCommentPosition() + 1);
+            notifyItemRemoved(getLastCommentPosition() + 1);
         }
         removeVuukleLogo();
     }

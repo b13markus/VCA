@@ -50,4 +50,5 @@
     <string name="same_goons_with_a_different_party_become_acceptable">same goons with a different party become acceptable</string>
     <string name="addArticleWebView">addArticleWebView</string>
     <string name="addAdsBanner">add_ads_banner</string>
+    <string name="addTopArticle">add_top_article</string>
 </resources>

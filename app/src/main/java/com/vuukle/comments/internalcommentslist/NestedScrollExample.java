@@ -22,7 +22,7 @@ public class NestedScrollExample extends AppCompatActivity {
     private String TAGS = "articleTag1, articleTag";
     private String TITLE = "The title of the article";
     private String ARTICLE_ID = "00048";
-    private int paginationToCount = 1000;
+    private int paginationToCount = 10;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +58,7 @@ public class NestedScrollExample extends AppCompatActivity {
                 .setContext(this)
                 .setSwipeToRefreshEnable(false)
                 .setEmoteVisible(false)
+                .setTopArticle(true)
                 .setFragmentId(R.id.container)
                 .build();
     }

@@ -2,6 +2,7 @@ package com.vuukle.comment_library.network;
 
 import android.app.Activity;
 
+import com.vuukle.comment_library.models.TopArticleModel;
 import com.vuukle.comments.vuuklecommentlibrary.R;
 import com.vuukle.comment_library.models.User;
 
@@ -139,6 +140,19 @@ import com.vuukle.comment_library.models.User;
                 articleImage,
                 emote).enqueue(callback);
     }
+
+     public static void getTopArticle(String bizId,
+                                                 String host,
+                                                 String tag,
+                                                 Integer hours,
+                                                 Integer count,
+                                                 CancelableCallback callback) {
+         RetrofitBuilder.getApi().getTopArticle(bizId,
+                 host,
+                 tag,
+                 hours,
+                 count).enqueue(callback);
+     }
 
     private static String checkLikeOrDislike(int viewId) {
         if (viewId == R.id.like) {

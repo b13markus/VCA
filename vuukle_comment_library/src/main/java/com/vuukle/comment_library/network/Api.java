@@ -4,7 +4,9 @@ import com.vuukle.comment_library.models.CommentFeedModel;
 import com.vuukle.comment_library.models.PostCommentResultModel;
 import com.vuukle.comment_library.models.RaitingModel;
 import com.vuukle.comment_library.models.ReplyModel;
+import com.vuukle.comment_library.models.TopArticleModel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -84,4 +86,11 @@ interface Api {
                                 @Query("article_title") String articleTitle,
                                 @Query("article_image") String article_image,
                                 @Query("emote") Integer emote);
+
+    @GET("getRecentMostCommentedByHostByTime")
+    Call<ArrayList<TopArticleModel>> getTopArticle(@Query("bizId") String bizId,
+                                                  @Query("host") String host,
+                                                  @Query("tag") String tag,
+                                                  @Query("hours") Integer hours,
+                                                  @Query("count") Integer count);
 }
