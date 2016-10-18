@@ -182,7 +182,6 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     } else {
                         commentsWithReplies.addAll(getLastCommentPosition() + 1, topArticle);
                     }
-
                     notifyDataSetChanged();
                 }
             });
@@ -281,7 +280,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private void fillTopArticle(TopArticleViewHolder holder, int position) {
         TopArticleModel article = (TopArticleModel) commentsWithReplies.get(position);
         Picasso.with(mContext).load(article.getImg()).into(holder.articleImg);
-
+        holder.topArticle = article;
     }
 
     private LoadMoreHolder createLoadMoreHolder(LayoutInflater inflater, ViewGroup parent) {
