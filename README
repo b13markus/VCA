@@ -1,0 +1,46 @@
+1. To Set up the library simply import this library to your project (File -> New -> Import module)
+2. Than you need only ones call VuukleAPIBuilder   new VuukleApiBuilder(this).setVuukleApiKey(API_KEY)
+                                                                 .setVuukleHost(HOST)
+                                                                 .setVuukleSecretKey(SECRET_KEY)
+                                                                 .build(); // this - context
+
+
+
+ a. setVuukleHost(HOST) - Set host for Api. Host - this is domain of the publisher’s site(e.g. indianexpress.com, thehindu.com etc.).
+    For example: You are the owner of indianexpress.com and have own app where want’s to setup this library,
+    so when library installed on your app, You should paste domain for ‘host’ property without http:// or https:// or www.
+
+ b. setVuukleSecretKey(SECRET_KEY)  - To get SECRET KEY / API KEY you need :
+                                      1) Sign in to dashboard through vuukle.com
+                                      2) Navigate to domain from home page of dashboard (first page after signing in)
+                                      3) Choose in menu Integration, then API Docs from the dropdown
+                                      4) Then you will be able to see api and SECRET keys
+                                      ---- or ----
+                                      1) Sign in to dashboard thouth vuukle.com
+                                      2) after signing in, in header you can find ‘Integration’ click -> choose API docs in the drop-down.
+
+ c. setVuukleApiKey(API_KEY) - same as for SECRET KEY
+
+3. And for every article you need to setup Vuukle comments builder.   new VuukleCommentsBuilder()
+                                                                                      .setVuukleArticleId(ARTICLE_ID)
+                                                                                      .setTimeZone(TIME_ZONE)
+                                                                                      .setVuukleUrl(URL)
+                                                                                      .setVuukleTagsTags(TAGS)
+                                                                                      .setVuukleTitle(TITLE)
+                                                                                      .setPaginationToCount(paginationToCount)
+                                                                                      .setContext(this)
+                                                                                      .setSwipeToRefreshEnable(true)
+                                                                                      .setFragmentId(R.id.container)
+                                                                                      .build();
+
+
+ a. setVuukleArticleId(ARTICLE_ID) - every article have unique Article ID
+ b. setTimeZone(TIME_ZONE) - set your timezone.  https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+ c. setVuukleUrl(URL) - url for your article (you will be able to share this link to facebook or to twitter)
+ d. setVuukleTagsTags(TAGS)  Tags - You need to paste tags separated by comma for each article(like you have on website/domain),
+
+ e. setVuukleTitle(TITLE)   same for  TITLE - title of the article on which library is now.
+ f. setPaginationToCount(paginationToCount) - this field in not required.  You can set how many comments will be downloaded per one request . By default 10.
+ g. setContext(this) - put context;
+ h. setSwipeToRefreshEnable(true) - This field is not required. if true - you will be able to refresh your comments.
+ i. setFragmentId(R.id.container) - Set fragment id from your .xml in which you want to put all comments

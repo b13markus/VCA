@@ -1,0 +1,50 @@
+Example how to add nested scroll 
+
+1. Your activity should extaend AppCompatActivity
+2. All your content should be inside CoordinatorLayout  (in order to use NestedScrollView)
+3. Inside CoordinatorLayout put NestedScrollView 
+4. Add app:layout_behavior="@string/appbar_scrolling_view_behavior"  to NestedScrollView
+5. Inside NestedScrollView you can put any layout and put all your content 
+6. To add our library, add FrameLayout / RelativeLayout to NestedScrollView , example :    
+   <RelativeLayout
+ 	android:id="@+id/container" // this id you will pass in VuukleCommentsBuilder    .setFragmentId(R.id.container)
+        android:layout_width="match_parent"
+    	android:layout_height="match_parent"        />
+
+7. That's it! 
+
+
+.xml example 
+
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.v4.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical" >
+
+            <WebView
+                android:id="@+id/webview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+            </WebView>
+
+            <RelativeLayout
+                android:id="@+id/container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                />
+        </LinearLayout>
+
+    </android.support.v4.widget.NestedScrollView>
+
+</android.support.design.widget.CoordinatorLayout>
