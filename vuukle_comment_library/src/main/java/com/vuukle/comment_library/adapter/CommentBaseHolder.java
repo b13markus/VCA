@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.vuukle.comment_library.models.BaseCommentModel;
+import com.vuukle.comment_library.models.User;
 import com.vuukle.comment_library.network.ApiService;
 import com.vuukle.comment_library.network.CancelableCallback;
 import com.vuukle.comment_library.utils.SharedPreferenceUtils;
@@ -53,28 +54,40 @@ class CommentBaseHolder extends RecyclerView.ViewHolder {
         int i = v.getId();
 
 
-        if (i == R.id.like  || i == R.id.dislike) {
+        if (i == R.id.like || i == R.id.dislike) {
             likeOrDislikeComment(v.getId());
             return;
         }
 
-        if(i == R.id.report_menu){
+        if (i == R.id.report_menu) {
             showReportMenu(v);
             return;
         }
 
-        if(i == R.id.comment_facebook_share){
+        if (i == R.id.comment_facebook_share) {
             shareWithFacebook();
             return;
         }
 
-        if(i == R.id.comment_twitter_share){
+        if (i == R.id.comment_twitter_share) {
             shareWithTwitter();
+        }
+
+        if (i == R.id.show_replyes) {
+            if (User.isUserLogedIn(context)) {
+                replyEmail.setVisibility(View.GONE);
+                replyUserName.setVisibility(View.GONE);
+                replyWelcomeTv.setVisibility(View.VISIBLE);
+                replyWelcomeTv.setText(context.getString(R.string.welcome_user) + User.getUserName(context));
+            } else {
+                replyEmail.setVisibility(View.VISIBLE);
+                replyUserName.setVisibility(View.VISIBLE);
+                replyWelcomeTv.setVisibility(View.GONE);
+            }
         }
     };
 
     private void shareWithTwitter() {
-
         String tweetUrl = String.format("https://twitter.com/intent/tweet?text=%s&url=%s",
                 urlEncode(message.getText().toString()),
                 urlEncode(CommentsAdapter.ARTICLE_URL));
@@ -93,8 +106,7 @@ class CommentBaseHolder extends RecyclerView.ViewHolder {
     private static String urlEncode(String s) {
         try {
             return URLEncoder.encode(s, "UTF-8");
-        }
-        catch (UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             throw new RuntimeException("URLEncoder.encode() failed for " + s);
         }
     }
@@ -149,6 +161,7 @@ class CommentBaseHolder extends RecyclerView.ViewHolder {
         reportButton.setOnClickListener(reportMenuListener);
         like.setOnClickListener(onClickListener);
         dislike.setOnClickListener(onClickListener);
+        showReplyes.setOnClickListener(onClickListener);
     }
 
     public void setLikeOrDislike(final int viewId, final ArrayList<String> likeAndDislikesId) {

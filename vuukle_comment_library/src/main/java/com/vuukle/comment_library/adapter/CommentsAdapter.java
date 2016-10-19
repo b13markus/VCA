@@ -407,8 +407,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         holder.commentModel = comment;
         holder.userPoints.setText(comment.getUserPoints().toString());
         holder.context = mContext;
-        holder.replyUserName.setText(User.getUserName(mContext));
-        holder.replyEmail.setText(User.getUserEmail(mContext));
+        holder.replyWelcomeTv.setText(mContext.getString(R.string.welcome_user)+User.getUserName(mContext));
         initReplyLayout(holder, position);
         loadImage(comment, holder);
     }
@@ -416,8 +415,8 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private void fillReplyFields(CommentBaseHolder holder, int position) {
         setLogOutButton(holder);
         ReplyModel reply = (ReplyModel) commentsWithReplies.get(position);
-        holder.userName.setText(reply.getName());
         holder.initialImage.setText(reply.getInitials());
+        holder.userName.setText(reply.getName());
         holder.message.setText(reply.getComment());
         fillUpVotes(holder, reply);
         fillDownVotes(holder, reply);
@@ -533,6 +532,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     private void setReplyLayoutVisible(CommentBaseHolder holder, int position) {
+        setLogOutButton(holder);
         LinearLayout feedbackLayout = (LinearLayout) holder.itemView.findViewById(R.id.reply_layout);
         if (feedbackLayout.getVisibility() == View.GONE) {
             currentOpenPosition = position;
