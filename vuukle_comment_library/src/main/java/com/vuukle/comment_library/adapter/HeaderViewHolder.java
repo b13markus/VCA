@@ -78,7 +78,6 @@ public class HeaderViewHolder extends RecyclerView.ViewHolder {
                 @Override
                 public void onResponse(Call call, Response response) {
                     mPostCommentCallback.onCommentPost(name, email, comment);
-
                     writeComment.setText(R.string.empty_field);
                     v.setEnabled(true);
                     logout.setVisibility(View.VISIBLE);

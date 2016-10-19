@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -346,8 +347,21 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
     }
 
+    private void setLogOutButton(CommentBaseHolder holder) {
+        if (User.isUserLogedIn(mContext)) {
+            holder.replyEmail.setVisibility(View.GONE);
+            holder.replyUserName.setVisibility(View.GONE);
+            holder.replyWelcomeTv.setVisibility(View.VISIBLE);
+            holder.replyWelcomeTv.setText(mContext.getString(R.string.welcome_user) + User.getUserName(mContext));
+        } else {
+            holder.replyEmail.setVisibility(View.VISIBLE);
+            holder.replyUserName.setVisibility(View.VISIBLE);
+            holder.replyWelcomeTv.setVisibility(View.GONE);
+        }
+    }
+
     private void initReplyLayout(CommentBaseHolder holder, int position) {
-        RelativeLayout replyLayout = (RelativeLayout) holder.itemView.findViewById(R.id.reply_layout);
+        LinearLayout replyLayout = (LinearLayout) holder.itemView.findViewById(R.id.reply_layout);
         if (currentOpenPosition != position) {
             replyLayout.setVisibility(View.GONE);
         } else {
@@ -380,6 +394,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     private void fillCommentFields(CommentBaseHolder holder, int position) {
+        setLogOutButton(holder);
         CommentModel comment = (CommentModel) commentsWithReplies.get(position);
         setBorderInvisible(holder, position);
         holder.userName.setText(comment.getName());
@@ -399,6 +414,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     private void fillReplyFields(CommentBaseHolder holder, int position) {
+        setLogOutButton(holder);
         ReplyModel reply = (ReplyModel) commentsWithReplies.get(position);
         holder.userName.setText(reply.getName());
         holder.initialImage.setText(reply.getInitials());
@@ -411,8 +427,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         holder.commentModel = reply;
         holder.userPoints.setText(reply.getUserPoints().toString());
         holder.context = mContext;
-        holder.replyUserName.setText(User.getUserName(mContext));
-        holder.replyEmail.setText(User.getUserEmail(mContext));
+        holder.replyWelcomeTv.setText(mContext.getString(R.string.welcome_user)+User.getUserName(mContext));
         initReplyLayout(holder, position);
         loadImage(reply, holder);
     }
@@ -518,7 +533,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     private void setReplyLayoutVisible(CommentBaseHolder holder, int position) {
-        RelativeLayout feedbackLayout = (RelativeLayout) holder.itemView.findViewById(R.id.reply_layout);
+        LinearLayout feedbackLayout = (LinearLayout) holder.itemView.findViewById(R.id.reply_layout);
         if (feedbackLayout.getVisibility() == View.GONE) {
             currentOpenPosition = position;
             setPreviousReplyLayoutInvisible(holder);

@@ -203,8 +203,9 @@
 
         </LinearLayout>
 
-        <RelativeLayout
+        <LinearLayout
             android:id="@+id/reply_layout"
+            android:orientation="vertical"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
@@ -214,7 +215,7 @@
             android:layout_toEndOf="@+id/picture"
             android:layout_toRightOf="@+id/picture"
             android:background="@drawable/reply_layout_background"
-            android:visibility="gone">
+            android:visibility="visible">
 
             <EditText
                 android:id="@+id/reply_message"
@@ -237,9 +238,6 @@
                 android:id="@+id/reply_name"
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:layout_below="@id/reply_message"
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
                 android:layout_marginTop="10dp"
@@ -253,13 +251,21 @@
                 android:textColorHint="@color/text_hint"
                 android:textSize="12sp" />
 
+            <TextView
+                android:id="@+id/reply_welcome_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:visibility="gone"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:text="@string/welcome"/>
+
+
             <EditText
                 android:id="@+id/reply_email"
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:layout_below="@id/reply_name"
                 android:layout_margin="10dp"
                 android:background="@drawable/edit_text_background"
                 android:hint="@string/comments_item_email"
@@ -275,16 +281,13 @@
                 android:id="@+id/reply_post"
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:layout_below="@id/reply_email"
                 android:layout_marginBottom="10dp"
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
                 android:background="@drawable/post_button_backggound"
                 android:text="@string/comments_item_post"
                 android:textColor="@android:color/white" />
-        </RelativeLayout>
+        </LinearLayout>
 
         <ImageView
             android:id="@+id/user_image"

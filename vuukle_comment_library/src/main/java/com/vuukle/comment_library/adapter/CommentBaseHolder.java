@@ -40,6 +40,7 @@ class CommentBaseHolder extends RecyclerView.ViewHolder {
 
     TextView userName, message, timestamp, upVotes, downVotes, initialImage, userPoints;
     EditText replyUserName, replyEmail, replyMessage;
+    TextView replyWelcomeTv;
     Button replyPost;
     private RelativeLayout loadMore;
     ImageView avatar, reportButton, like, dislike, shareTwitter, shareFacebook;
@@ -143,6 +144,7 @@ class CommentBaseHolder extends RecyclerView.ViewHolder {
         shareFacebook = (ImageView) itemView.findViewById(R.id.comment_facebook_share);
         shareFacebook.setOnClickListener(onClickListener);
         shareTwitter = (ImageView) itemView.findViewById(R.id.comment_twitter_share);
+        replyWelcomeTv = (TextView) itemView.findViewById(R.id.reply_welcome_tv);
         shareTwitter.setOnClickListener(onClickListener);
         reportButton.setOnClickListener(reportMenuListener);
         like.setOnClickListener(onClickListener);
