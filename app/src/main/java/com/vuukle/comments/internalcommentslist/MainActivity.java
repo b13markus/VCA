@@ -14,7 +14,7 @@ public class MainActivity extends AppCompatActivity {
     private String SECRET_KEY = "07115720-6848-11e5-9bc9-002590f371ee";
     private String HOST = "vuukle.com";
     private String TIME_ZONE = "Europe/Kiev";
-    private String URL = "https://www.google.com.ua/";
+    private String URL = "http://indianexpress.com/article/research/pm-modi-compares-indian-army-to-that-of-israels-here-is-why/";
     private String TAGS = "articleTag1, articleTag";
     private String TITLE = "The title of the article";
     private String ARTICLE_ID = "00048";
@@ -53,5 +53,4 @@ public class MainActivity extends AppCompatActivity {
                 .setTopArticle(true)
                 .build();
     }
-
 }
