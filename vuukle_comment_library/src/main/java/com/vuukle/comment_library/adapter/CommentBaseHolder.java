@@ -74,16 +74,8 @@ class CommentBaseHolder extends RecyclerView.ViewHolder {
         }
 
         if (i == R.id.show_replyes) {
-            if (User.isUserLogedIn(context)) {
-                replyEmail.setVisibility(View.GONE);
-                replyUserName.setVisibility(View.GONE);
-                replyWelcomeTv.setVisibility(View.VISIBLE);
-                replyWelcomeTv.setText(context.getString(R.string.welcome_user) + User.getUserName(context));
-            } else {
-                replyEmail.setVisibility(View.VISIBLE);
-                replyUserName.setVisibility(View.VISIBLE);
-                replyWelcomeTv.setVisibility(View.GONE);
-            }
+            isLoginUser();
+
         }
     };
 
@@ -130,6 +122,18 @@ class CommentBaseHolder extends RecyclerView.ViewHolder {
         }
     }
 
+    private void isLoginUser() {
+        if (User.isUserLogedIn(context)) {
+            replyEmail.setVisibility(View.GONE);
+            replyUserName.setVisibility(View.GONE);
+            replyWelcomeTv.setVisibility(View.VISIBLE);
+            replyWelcomeTv.setText(context.getString(R.string.welcome_user) + User.getUserName(context));
+        } else {
+            replyEmail.setVisibility(View.VISIBLE);
+            replyUserName.setVisibility(View.VISIBLE);
+            replyWelcomeTv.setVisibility(View.GONE);
+        }
+    }
 
     private final View.OnClickListener reportMenuListener = this::showReportMenu;
 
