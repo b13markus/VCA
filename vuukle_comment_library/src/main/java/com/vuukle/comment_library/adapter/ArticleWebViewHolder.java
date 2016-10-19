@@ -20,7 +20,10 @@ public class ArticleWebViewHolder extends RecyclerView.ViewHolder {
 
     }
 
-    public void initWebView(String url) {
+    public void reloadWebView(String url) {
+        if(!webView.getUrl().equals(url)) {
+            webView.loadUrl(CommentsAdapter.ARTICLE_URL);
+        }
     }
 
     private class MyWebViewClient extends WebViewClient {

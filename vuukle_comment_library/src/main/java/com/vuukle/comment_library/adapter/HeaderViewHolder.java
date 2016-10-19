@@ -31,11 +31,10 @@ import static com.vuukle.comment_library.adapter.CommentsAdapter.TIME_ZONE;
 import static com.vuukle.comment_library.adapter.CommentsAdapter.TITLE;
 import static com.vuukle.comment_library.adapter.CommentsAdapter.ARTICLE_URL;
 
-
-public class HeaderViewHolder  extends RecyclerView.ViewHolder {
+public class HeaderViewHolder extends RecyclerView.ViewHolder {
 
     EditText writeComment, userName, userEmail;
-    TextView totalCount;
+    TextView totalCount, welcomeTv;
     Button postComment, logout;
     PostCommentCallback mPostCommentCallback;
     Context mContext;
@@ -53,6 +52,7 @@ public class HeaderViewHolder  extends RecyclerView.ViewHolder {
         totalCount = ((TextView) itemView.findViewById(R.id.total_comment));
         postComment = ((Button) itemView.findViewById(R.id.header_post_comment));
         logout = (Button) itemView.findViewById(R.id.logout);
+        welcomeTv = (TextView) itemView.findViewById(R.id.welcome_tv);
         logout.setOnClickListener(v -> logout(v));
         postComment.setOnClickListener(v -> {
             v.setEnabled(false);
@@ -63,8 +63,11 @@ public class HeaderViewHolder  extends RecyclerView.ViewHolder {
 
     private void logout(View v) {
         v.setVisibility(View.GONE);
+        userName.setVisibility(View.VISIBLE);
+        userEmail.setVisibility(View.VISIBLE);
         userName.setText("");
         userEmail.setText("");
+        welcomeTv.setVisibility(View.GONE);
         User.setUser((Activity) mContext, "", "");
     }
 
@@ -74,11 +77,15 @@ public class HeaderViewHolder  extends RecyclerView.ViewHolder {
             ApiService.postComment(name, email, comment, new CancelableCallback() {
                 @Override
                 public void onResponse(Call call, Response response) {
-                    mPostCommentCallback.onCommentPost(name,email,comment);
+                    mPostCommentCallback.onCommentPost(name, email, comment);
 
                     writeComment.setText(R.string.empty_field);
                     v.setEnabled(true);
                     logout.setVisibility(View.VISIBLE);
+                    userName.setVisibility(View.GONE);
+                    userEmail.setVisibility(View.GONE);
+                    welcomeTv.setVisibility(View.VISIBLE);
+                    welcomeTv.setText(mContext.getString(R.string.welcome_user) + User.getUserName((Activity) mContext));
                     Toast.makeText(mContext, mContext.getString(R.string.comment_posted), Toast.LENGTH_SHORT).show();
                 }
 

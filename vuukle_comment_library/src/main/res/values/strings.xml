@@ -51,4 +51,6 @@
     <string name="addArticleWebView">addArticleWebView</string>
     <string name="addAdsBanner">add_ads_banner</string>
     <string name="addTopArticle">add_top_article</string>
+    <string name="welcome">welcome_user</string>
+    <string name="welcome_user">"Welcome, "</string>
 </resources>

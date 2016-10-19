@@ -8,7 +8,6 @@ import com.vuukle.comments.vuuklecommentlibrary.R;
 
 public class User {
 
-
     public static String getUserName(Activity activity){
         SharedPreferences sPref = activity.getPreferences(Context.MODE_PRIVATE);
         return sPref.getString(activity.getResources().getString(R.string.user_name), "");

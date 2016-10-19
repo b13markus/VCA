@@ -18,7 +18,7 @@ public class MainActivity extends AppCompatActivity {
     private String TAGS = "articleTag1, articleTag";
     private String TITLE = "The title of the article";
     private String ARTICLE_ID = "00048";
-    private int paginationToCount = 1000;
+    private int paginationToCount = 10;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +49,8 @@ public class MainActivity extends AppCompatActivity {
                 .setEmoteVisible(false)
                 .setSwipeToRefreshEnable(false)
                 .setFragmentId(R.id.container)
-                .addArticleWebView(false)
+                .addArticleWebView(true)
+                .setTopArticle(true)
                 .build();
     }
 
