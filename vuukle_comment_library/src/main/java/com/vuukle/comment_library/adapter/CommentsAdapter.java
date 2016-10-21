@@ -492,8 +492,6 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             holder.initialImage.setText(reply.getInitials());
         } else {
             Picasso.with(mContext).load(reply.getAvatarUrl()).into(holder.avatar);
-            FrameLayout frameLayout = (FrameLayout) holder.initialImage.getParent();
-            frameLayout.setVisibility(View.INVISIBLE);
         }
     }
 
