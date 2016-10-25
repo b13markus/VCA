@@ -613,7 +613,6 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     private void loadMoreComments(LoadMoreHolder holder) {
-
         ApiService.getAllComments(PAGINATION_FROM, PAGINATION_TO, new CancelableCallback() {
             @Override
             public void onResponse(Call call, Response response) {
