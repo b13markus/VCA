@@ -29,7 +29,6 @@ import static com.vuukle.comment_library.adapter.CommentsAdapter.ARTICLE_URL;
 
 public class EmotesViewHolder extends RecyclerView.ViewHolder {
 
-
     private TextView happyRatio, happyRatioCount,
             indifferentRatio, indifferentRatioCount,
             amusedRatio, amusedRatioCount,
