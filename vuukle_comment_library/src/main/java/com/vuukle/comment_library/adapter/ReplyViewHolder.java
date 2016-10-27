@@ -5,7 +5,7 @@ import android.view.View;
 
 public class ReplyViewHolder extends CommentBaseHolder {
 
-    public ReplyViewHolder(View itemView) {
-        super(itemView);
+    public ReplyViewHolder(View itemView, PostReplyCallback callback) {
+        super(itemView, callback);
     }
 }

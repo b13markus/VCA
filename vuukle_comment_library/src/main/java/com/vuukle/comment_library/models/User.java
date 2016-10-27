@@ -18,14 +18,14 @@ public class User {
         return sPref.getString(activity.getResources().getString(R.string.user_email), "");
     }
 
-    public static void setUser(Activity mContext, String name, String email) {
+    public static void setUser(Activity mContext, String email, String name ) {
         SharedPreferences sPref = (mContext).getPreferences(Context.MODE_PRIVATE);
         SharedPreferences.Editor ed = sPref.edit();
-        ed.putString(mContext.getString(R.string.user_name), name);
         ed.putString(mContext.getString(R.string.user_email), email);
+        ed.putString(mContext.getString(R.string.user_name), name);
         ed.apply();
 
-        if(name.isEmpty()&& email.isEmpty()){
+        if(name.isEmpty() && email.isEmpty()){
             setUserLogedIn(mContext, false);
         }else {
             setUserLogedIn(mContext, true);

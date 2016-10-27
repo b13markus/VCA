@@ -16,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 import com.vuukle.comment_library.models.AdsBannerModel;
@@ -33,6 +34,7 @@ import com.vuukle.comment_library.models.VuukleLogo;
 import com.vuukle.comment_library.network.ApiService;
 import com.vuukle.comment_library.network.CancelableCallback;
 import com.vuukle.comment_library.utils.DateFormat;
+import com.vuukle.comment_library.utils.Utils;
 import com.vuukle.comments.vuuklecommentlibrary.R;
 
 import java.util.ArrayList;
@@ -67,7 +69,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     static String ARTICLE_URL;
     static String TAGS;
     static String TITLE;
-    private static int RESOURCE_ID;
+    static int RESOURCE_ID;
     private static int PAGINATION_FROM;
     private static final String PLACEHOLDER_URL = "http://3aa0b40d2aab024f527d-510de3faeb1a65410c7c889a906ce44e.r42.cf6.rackcdn.com/avatar.png";
     private static int PAGINATION_TO;
@@ -91,7 +93,20 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     private PostCommentCallback postCommentCallback = (name, email, comment) -> {
         addCommentToList(name, comment);
-        saveUserToPreferences(email, name);
+    };
+
+    private PostReplyCallback postReplyCallback = (ReplyModel replyModel, int position) -> {
+        int nextPosition = position + 1;
+        ((BaseCommentModel) commentsWithReplies.get(position)).setRepliesCount(((BaseCommentModel) commentsWithReplies.get(position)).getRepliesCount() + 1);
+        ((BaseCommentModel) commentsWithReplies.get(position)).setReplyShow(true);
+        replyModel.setCommentLevel(((BaseCommentModel) commentsWithReplies.get(position)).getCommentLevel() + 1);
+        commentsWithReplies.add(nextPosition, replyModel);
+        notifyItemInserted(nextPosition);
+
+    };
+
+    private HideReplyCallback replyCallback = () -> {
+
     };
 
     private TopArticleCallback topArticleCallback = (TopArticleModel model, CommentFeedModel commentFeedModel) -> {
@@ -149,7 +164,6 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         addHeader();
         loadMoreComments(null);
         addTopArticle();
-
 
         sPrefs = mContext.getSharedPreferences(mContext.getString(R.string.vuukle), Context.MODE_PRIVATE);
         mEditor = sPrefs.edit();
@@ -240,11 +254,11 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         switch (viewType) {
             case REPLY:
-                return new ReplyViewHolder(inflater.inflate(R.layout.reply_item, parent, false));
+                return new ReplyViewHolder(inflater.inflate(R.layout.reply_item, parent, false), postReplyCallback);
             case COMMENT:
-                return new CommentsViewHolder(inflater.inflate(R.layout.comment_item, parent, false));
+                return new CommentsViewHolder(inflater.inflate(R.layout.comment_item, parent, false), postReplyCallback);
             case HEADER:
-                return new HeaderViewHolder(inflater.inflate(R.layout.post_comment_header, parent, false), postCommentCallback);
+                return new HeaderViewHolder(inflater.inflate(R.layout.post_comment_header, parent, false), postCommentCallback, replyCallback);
             case EMOTES:
                 return new EmotesViewHolder(inflater.inflate(R.layout.fragment_emotes_rating, parent, false));
             case LOAD_MORE:
@@ -256,9 +270,9 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             case ARTICLE_WEBVIEW:
                 return new ArticleWebViewHolder(inflater.inflate(R.layout.article_webview, parent, false));
             case TOP_ARTICLE:
-                return new TopArticleViewHolder(inflater.inflate(R.layout.top_article_item, parent, false),topArticleCallback );
+                return new TopArticleViewHolder(inflater.inflate(R.layout.top_article_item, parent, false), topArticleCallback);
             default:
-                return new CommentsViewHolder(inflater.inflate(R.layout.comment_item, parent, false));
+                return new CommentsViewHolder(inflater.inflate(R.layout.comment_item, parent, false), postReplyCallback);
         }
     }
 
@@ -316,8 +330,6 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     private void fillHeaderFields(HeaderViewHolder holder) {
         setLogOutButton(holder);
-        holder.userName.setText(User.getUserName(mContext));
-        holder.userEmail.setText(User.getUserEmail(mContext));
 
         int totalCount = ((HeaderModel) commentsWithReplies.get(HEADER_POSITION)).getCommentCount();
         switch (totalCount) {
@@ -407,7 +419,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         holder.commentModel = comment;
         holder.userPoints.setText(comment.getUserPoints().toString());
         holder.context = mContext;
-        holder.replyWelcomeTv.setText(mContext.getString(R.string.welcome_user)+User.getUserName(mContext));
+        holder.replyWelcomeTv.setText(mContext.getString(R.string.welcome_user) + User.getUserName(mContext));
         initReplyLayout(holder, position);
         loadImage(comment, holder);
     }
@@ -426,7 +438,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         holder.commentModel = reply;
         holder.userPoints.setText(reply.getUserPoints().toString());
         holder.context = mContext;
-        holder.replyWelcomeTv.setText(mContext.getString(R.string.welcome_user)+User.getUserName(mContext));
+        holder.replyWelcomeTv.setText(mContext.getString(R.string.welcome_user) + User.getUserName(mContext));
         initReplyLayout(holder, position);
         loadImage(reply, holder);
     }
@@ -495,38 +507,10 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
     }
 
-    private void sendReplyMessage(CommentBaseHolder holder, int position, ReplyModel reply) {
-        if (dataIsValid(holder.replyEmail.getText().toString(), holder.replyUserName.getText().toString(), holder.replyMessage.getText().toString())) {
-            int nextPosition = position + 1;
-            ((BaseCommentModel) commentsWithReplies.get(position)).setRepliesCount(((BaseCommentModel) commentsWithReplies.get(position)).getRepliesCount() + 1);
-            ((BaseCommentModel) commentsWithReplies.get(position)).setReplyShow(true);
-            reply.setCommentLevel(((BaseCommentModel) commentsWithReplies.get(position)).getCommentLevel() + 1);
-            commentsWithReplies.add(nextPosition, reply);
-            notifyItemInserted(nextPosition);
-            holder.replyMessage.setText(R.string.empty_field);
-            holder.itemView.findViewById(R.id.reply_layout).setVisibility(View.GONE);
-        } else {
-            showError(holder);
-        }
-    }
-
     private void addCommentToList(String name, String comment) {
         CommentModel commentModel = new CommentModel(comment, name);
         commentsWithReplies.add(HEADER_POSITION + 1, commentModel);
         notifyItemInserted(HEADER_POSITION + 1);
-    }
-
-    private ReplyModel getReply(CommentBaseHolder holder) {
-        ReplyModel reply = new ReplyModel();
-        reply.setName(holder.replyUserName.getText().toString());
-        reply.setEmail(holder.replyEmail.getText().toString());
-        reply.setComment(holder.replyMessage.getText().toString());
-        reply.setCommentId(holder.commentId);
-        return reply;
-    }
-
-    private boolean emailIsValid(String target) {
-        return !TextUtils.isEmpty(target) && android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
     }
 
     private void setReplyLayoutVisible(CommentBaseHolder holder, int position) {
@@ -536,7 +520,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             currentOpenPosition = position;
             setPreviousReplyLayoutInvisible(holder);
             feedbackLayout.setVisibility(View.VISIBLE);
-            postReply(holder, position);
+            //postReply(holder, position);
         } else {
             feedbackLayout.setVisibility(View.GONE);
             currentOpenPosition = -1;
@@ -552,37 +536,6 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
     }
 
-    private void postReply(CommentBaseHolder holder, int position) {
-        hideKeyboard(holder.replyPost);
-        holder.replyPost.setOnClickListener(v -> {
-            v.setEnabled(false);
-            mReply = getReply(holder);
-            postReplyToServer(mReply, holder);
-            saveUserToPreferences(mReply.getEmail(), mReply.getName());
-            sendReplyMessage(holder, position, mReply);
-            currentOpenPosition = -1;
-        });
-    }
-
-    public void saveUserToPreferences(String email, String name) {
-        User.setUser(mContext, name, email);
-    }
-
-    private void postReplyToServer(ReplyModel reply, CommentBaseHolder holder) {
-        ApiService.postReply(reply.getName(), reply.getEmail(), reply.getComment(), reply.getCommentId(), new CancelableCallback() {
-            @Override
-            public void onResponse(Call call, Response response) {
-                Log.i(TAG, "onResponse: ");
-                holder.replyPost.setEnabled(true);
-            }
-
-            @Override
-            public void onFailure(Call call, Throwable t) {
-                Log.i(TAG, "onFailure: ");
-            }
-        }, HOST, ARTICLE_ID, API_KEY, SECRET_KEY, RESOURCE_ID);
-    }
-
     private void setPreviousReplyLayoutInvisible(CommentBaseHolder holder) {
         if (mHolder != null) {
             mHolder.itemView.findViewById(R.id.reply_layout).setVisibility(View.GONE);
@@ -593,23 +546,6 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     @Override
     public int getItemCount() {
         return commentsWithReplies == null ? 0 : commentsWithReplies.size();
-    }
-
-
-    private boolean dataIsValid(String userEmail, String userName, String commentMessage) {
-        return emailIsValid(userEmail) && !TextUtils.isEmpty(userName) && !TextUtils.isEmpty(commentMessage);
-    }
-
-    private void showError(CommentBaseHolder holder) {
-        if (!emailIsValid(holder.replyEmail.getText().toString())) {
-            holder.replyEmail.setError(mContext.getString(R.string.invalid_email));
-        }
-        if (TextUtils.isEmpty(holder.replyUserName.getText())) {
-            holder.replyUserName.setError(mContext.getString(R.string.field_is_empty));
-        }
-        if (TextUtils.isEmpty(holder.replyMessage.getText())) {
-            holder.replyMessage.setError(mContext.getString(R.string.field_is_empty));
-        }
     }
 
     private void loadMoreComments(LoadMoreHolder holder) {
@@ -671,7 +607,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         if (commentsWithReplies.size() < 2) {
             return;
         }
-        if(holder != null) {
+        if (holder != null) {
             if (commentsWithReplies.get(getLastCommentPosition() + 1) instanceof LoadMoreModel) {
                 commentsWithReplies.remove(getLastCommentPosition() + 1);
                 notifyItemRemoved(getLastCommentPosition() + 1);
@@ -741,10 +677,5 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 getRepliesForReply(replyModel);
             }
         }
-    }
-
-    private void hideKeyboard(View v) {
-        InputMethodManager imm = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
     }
 }

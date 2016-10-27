@@ -17,6 +17,7 @@ import android.widget.Toast;
 import com.vuukle.comment_library.models.User;
 import com.vuukle.comment_library.network.ApiService;
 import com.vuukle.comment_library.network.CancelableCallback;
+import com.vuukle.comment_library.utils.Utils;
 import com.vuukle.comments.vuuklecommentlibrary.R;
 
 import retrofit2.Call;
@@ -38,10 +39,12 @@ public class HeaderViewHolder extends RecyclerView.ViewHolder {
     Button postComment, logout;
     PostCommentCallback mPostCommentCallback;
     Context mContext;
+    HideReplyCallback replyCallback;
 
-    public HeaderViewHolder(View itemView, PostCommentCallback postCommentCallback) {
+    public HeaderViewHolder(View itemView, PostCommentCallback postCommentCallback, HideReplyCallback replyCallback) {
         super(itemView);
         mContext = itemView.getContext();
+        this.replyCallback = replyCallback;
         mPostCommentCallback = postCommentCallback;
         writeComment = ((EditText) itemView.findViewById(R.id.header_write_a_comment));
         writeComment.setScroller(new Scroller(itemView.getContext()));
@@ -56,34 +59,34 @@ public class HeaderViewHolder extends RecyclerView.ViewHolder {
         logout.setOnClickListener(v -> logout(v));
         postComment.setOnClickListener(v -> {
             v.setEnabled(false);
-            postComment(userEmail.getText().toString(), userName.getText().toString(), writeComment.getText().toString(), v);
+            saveUserToPreferences(userEmail.getText().toString(), userName.getText().toString(), writeComment.getText().toString());
+            postComment(User.getUserEmail((Activity) mContext),User.getUserName((Activity) mContext), writeComment.getText().toString(), v);
             writeComment.setText("");
         });
     }
 
+    private void saveUserToPreferences(String email , String name, String comment) {
+        if(Utils.dataIsValid(email,name,comment)) {
+            User.setUser((Activity) mContext, email, name);
+        }
+    }
+
     private void logout(View v) {
-        v.setVisibility(View.GONE);
-        userName.setVisibility(View.VISIBLE);
-        userEmail.setVisibility(View.VISIBLE);
-        userName.setText("");
-        userEmail.setText("");
-        welcomeTv.setVisibility(View.GONE);
+        showField(v);
         User.setUser((Activity) mContext, "", "");
+        replyCallback.hideReply();
     }
 
     private void postComment(String email, String name, String comment, View v) {
-        if (dataIsValid(email, name, comment)) {
-            hideKeyboard(v);
+        if (Utils.dataIsValid(email, name, comment)) {
+            Utils.hideKeyboard(v,mContext);
             ApiService.postComment(name, email, comment, new CancelableCallback() {
                 @Override
                 public void onResponse(Call call, Response response) {
                     mPostCommentCallback.onCommentPost(name, email, comment);
+                    hideField();
                     writeComment.setText(R.string.empty_field);
                     v.setEnabled(true);
-                    logout.setVisibility(View.VISIBLE);
-                    userName.setVisibility(View.GONE);
-                    userEmail.setVisibility(View.GONE);
-                    welcomeTv.setVisibility(View.VISIBLE);
                     welcomeTv.setText(mContext.getString(R.string.welcome_user) + User.getUserName((Activity) mContext));
                     Toast.makeText(mContext, mContext.getString(R.string.comment_posted), Toast.LENGTH_SHORT).show();
                 }
@@ -100,8 +103,25 @@ public class HeaderViewHolder extends RecyclerView.ViewHolder {
         }
     }
 
+    private void hideField() {
+        logout.setVisibility(View.VISIBLE);
+        userName.setVisibility(View.GONE);
+        userEmail.setVisibility(View.GONE);
+        userName.setVisibility(View.GONE);
+        userEmail.setText("");
+        userName.setText("");
+        welcomeTv.setVisibility(View.VISIBLE);
+    }
+
+    private void showField(View v) {
+        v.setVisibility(View.GONE);
+        userName.setVisibility(View.VISIBLE);
+        userEmail.setVisibility(View.VISIBLE);
+        welcomeTv.setVisibility(View.GONE);
+    }
+
     private void showError() {
-        if (!emailIsValid(userEmail.getText().toString())) {
+        if (!Utils.emailIsValid(userEmail.getText().toString())) {
             userEmail.setError(mContext.getString(R.string.invalid_email));
         }
         if (TextUtils.isEmpty(userName.getText())) {
@@ -110,18 +130,5 @@ public class HeaderViewHolder extends RecyclerView.ViewHolder {
         if (TextUtils.isEmpty(writeComment.getText())) {
             writeComment.setError(mContext.getString(R.string.field_is_empty));
         }
-    }
-
-    private boolean emailIsValid(String target) {
-        return !TextUtils.isEmpty(target) && android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
-    }
-
-    private void hideKeyboard(View v) {
-        InputMethodManager imm = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-    }
-
-    private boolean dataIsValid(String userEmail, String userName, String commentMessage) {
-        return emailIsValid(userEmail) && !TextUtils.isEmpty(userName) && !TextUtils.isEmpty(commentMessage);
     }
 }

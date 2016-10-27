@@ -215,14 +215,14 @@
             android:layout_toEndOf="@+id/picture"
             android:layout_toRightOf="@+id/picture"
             android:background="@drawable/reply_layout_background"
-            android:visibility="gone">
+            android:visibility="visible">
 
             <EditText
                 android:id="@+id/reply_message"
                 android:layout_width="match_parent"
                 android:layout_height="100dp"
                 android:layout_marginBottom="10dp"
-                android:layout_marginLeft="60dp"
+                android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
                 android:layout_marginTop="10dp"
                 android:background="@drawable/edit_text_background"

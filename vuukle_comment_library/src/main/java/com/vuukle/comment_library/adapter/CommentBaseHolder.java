@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -17,10 +18,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.vuukle.comment_library.models.BaseCommentModel;
+import com.vuukle.comment_library.models.ReplyModel;
 import com.vuukle.comment_library.models.User;
 import com.vuukle.comment_library.network.ApiService;
 import com.vuukle.comment_library.network.CancelableCallback;
 import com.vuukle.comment_library.utils.SharedPreferenceUtils;
+import com.vuukle.comment_library.utils.Utils;
 import com.vuukle.comments.vuuklecommentlibrary.R;
 
 import java.io.UnsupportedEncodingException;
@@ -31,9 +34,11 @@ import java.util.List;
 import retrofit2.Call;
 import retrofit2.Response;
 
+import static android.content.ContentValues.TAG;
 import static com.vuukle.comment_library.adapter.CommentsAdapter.API_KEY;
 import static com.vuukle.comment_library.adapter.CommentsAdapter.ARTICLE_ID;
 import static com.vuukle.comment_library.adapter.CommentsAdapter.HOST;
+import static com.vuukle.comment_library.adapter.CommentsAdapter.RESOURCE_ID;
 import static com.vuukle.comment_library.adapter.CommentsAdapter.SECRET_KEY;
 
 
@@ -48,6 +53,7 @@ class CommentBaseHolder extends RecyclerView.ViewHolder {
     String commentId;
     LinearLayout showReplyes;
     BaseCommentModel commentModel;
+    PostReplyCallback callback;
     public Activity context;
 
     private View.OnClickListener onClickListener = v -> {
@@ -75,9 +81,49 @@ class CommentBaseHolder extends RecyclerView.ViewHolder {
 
         if (i == R.id.show_replyes) {
             isLoginUser();
+        }
 
+        if(i == R.id.reply_post) {
+            v.setEnabled(false);
+            saveUserToPreferences(replyEmail.getText().toString(), replyUserName.getText().toString(), replyMessage.getText().toString());
+            postReply(User.getUserEmail(context),User.getUserName(context),replyMessage.getText().toString(),commentId,v);
         }
     };
+
+    private void postReply(String email, String name, String comment, String commentId, View v) {
+        if(Utils.dataIsValid(email,name,comment)) {
+            ApiService.postReply(name, email, comment, commentId, new CancelableCallback() {
+                @Override
+                public void onResponse(Call call, Response response) {
+                    Log.i(TAG, "onResponse: ");
+                    ReplyModel replyModel = new ReplyModel();
+                    replyModel.setEmail(email);
+                    replyModel.setName(name);
+                    replyModel.setComment(comment);
+                    replyModel.setCommentId(commentId);
+                    callback.onReplyPost(replyModel, getAdapterPosition());
+                    replyPost.setEnabled(true);
+                    replyMessage.setText(R.string.empty_field);
+                    itemView.findViewById(R.id.reply_layout).setVisibility(View.GONE);
+                }
+
+                @Override
+                public void onFailure(Call call, Throwable t) {
+                    Log.i(TAG, "onFailure: ");
+                    replyPost.setEnabled(true);
+                }
+            }, HOST, ARTICLE_ID, API_KEY, SECRET_KEY, RESOURCE_ID);
+        } else {
+            showError();
+            replyPost.setEnabled(true);
+        }
+    }
+
+    private void saveUserToPreferences(String email , String name, String comment) {
+        if(Utils.dataIsValid(email,name,comment)) {
+            User.setUser(context, email, name);
+        }
+    }
 
     private void shareWithTwitter() {
         String tweetUrl = String.format("https://twitter.com/intent/tweet?text=%s&url=%s",
@@ -137,7 +183,7 @@ class CommentBaseHolder extends RecyclerView.ViewHolder {
 
     private final View.OnClickListener reportMenuListener = this::showReportMenu;
 
-    public CommentBaseHolder(View itemView) {
+    public CommentBaseHolder(View itemView, PostReplyCallback callback) {
         super(itemView);
 
         userName = (TextView) itemView.findViewById(R.id.user_name);
@@ -166,6 +212,9 @@ class CommentBaseHolder extends RecyclerView.ViewHolder {
         like.setOnClickListener(onClickListener);
         dislike.setOnClickListener(onClickListener);
         showReplyes.setOnClickListener(onClickListener);
+        replyPost.setOnClickListener(onClickListener);
+        this.callback = callback;
+
     }
 
     public void setLikeOrDislike(final int viewId, final ArrayList<String> likeAndDislikesId) {
@@ -216,5 +265,17 @@ class CommentBaseHolder extends RecyclerView.ViewHolder {
         popupMenu.setOnMenuItemClickListener(item -> true);
         popupMenu.setOnDismissListener(menu -> Log.i("dismiss menu", "showPopupMenu: "));
         popupMenu.show();
+    }
+
+    private void showError() {
+        if (!Utils.emailIsValid(User.getUserEmail(context))) {
+            replyEmail.setError(context.getString(R.string.invalid_email));
+        }
+        if (TextUtils.isEmpty(User.getUserEmail(context)) ){
+            replyUserName.setError(context.getString(R.string.field_is_empty));
+        }
+        if (TextUtils.isEmpty(replyMessage.getText())) {
+            replyMessage.setError(context.getString(R.string.field_is_empty));
+        }
     }
 }
